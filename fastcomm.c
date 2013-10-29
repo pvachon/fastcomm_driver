@@ -1,6 +1,8 @@
 /*
  * FASTCOMM driver layer.
  *
+ * Copyright (C)2013 Phil Vachon <phil@cowpig.ca>
+ *
  * Licensed under the GNU General Public License v2. See LICENSE in the source
  * distribution directory for more information.
  */
