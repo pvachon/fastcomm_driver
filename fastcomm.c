@@ -42,7 +42,6 @@ void fastcomm_igmp_group_destroy_rcu(struct rcu_head *head)
 static inline
 struct fastcomm_igmp_group *find_igmp_group_rcu(struct fastcomm_state *state, uint32_t grp_be)
 {
-    /* TODO: RCU-ify this */
     struct fastcomm_igmp_group *grp;
 
     list_for_each_entry_rcu(grp, &state->groups, gnode) {
@@ -140,10 +139,6 @@ long fastcomm_drv_change_mcast_membership(struct fastcomm_state *state,
         atomic_inc(&group->refcnt);
     }
 
-    if (ret < 0) {
-        DIAGK("Failed in ip_mc_join_group - %ld", ret);
-    }
-
 done:
     return ret;
 
@@ -178,6 +173,8 @@ long fastcomm_drv_ioctl(struct file *fp, unsigned int id, unsigned long data)
 
             if (copy_from_user(&kmcast, (void *)data, sizeof(kmcast)) > 0) {
                 printk(KERN_ALERT "Couldn't copy fastcomm_ioctl_mcast data from userspace ptr.\n");
+                ret = -EINVAL;
+                goto done;
             }
 
             ret = fastcomm_drv_ioctl_join_mcast_grp(state, &kmcast);
@@ -190,6 +187,8 @@ long fastcomm_drv_ioctl(struct file *fp, unsigned int id, unsigned long data)
 
             if (copy_from_user(&kmcast, (void *)data, sizeof(kmcast)) > 0) {
                 printk(KERN_ALERT "Couldn't copy fastcomm_ioctl_mcast data from userspace ptr.\n");
+                ret = -EINVAL;
+                goto done;
             }
 
             ret = fastcomm_drv_ioctl_leave_mcast_grp(state, &kmcast);
@@ -202,6 +201,8 @@ long fastcomm_drv_ioctl(struct file *fp, unsigned int id, unsigned long data)
 
             if (copy_from_user(&kbind, (void *)data, sizeof(kbind)) > 0) {
                 printk(KERN_ALERT "Couldn't copy fastcomm_ioctl_bind data from userspace ptr.\n");
+                ret = -EINVAL;
+                goto done;
             }
 
             ret = fastcomm_drv_ioctl_bind_if(state, &kbind);
